@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隆聚 vs 新荣记 — AI排菜系统对比分析</title>
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --card-bg: #141416;
+    --card-hover: #1a1a1d;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a8;
+    --text-muted: #6b6b76;
+    --accent: #635bff;
+    --accent-dim: #4a43c7;
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --yellow: #f59e0b;
+    --yellow-bg: rgba(245,158,11,0.1);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.1);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.1);
+    --border: #27272a;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+  
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  .header .badge {
+    display: inline-block;
+    background: rgba(99,91,255,0.12);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    color: var(--text-secondary);
+    font-size: 16px;
+  }
+
+  /* Section */
+  .section { margin-bottom: 56px; }
+  .section-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .icon { font-size: 28px; }
+
+  /* Data Cards Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* Stat Card */
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: var(--accent-dim); }
+  .stat-card .label {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .stat-card .value {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1px;
+  }
+  .stat-card .detail {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  /* Dimension Card */
+  .dim-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+  }
+  .dim-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dim-card h3 .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Bar chart */
+  .bar-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 12px;
+  }
+  .bar-row .tag-name {
+    width: 72px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-align: right;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .bar-row .bar-track {
+    flex: 1;
+    height: 24px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-row .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .bar-fill.longju { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+  .bar-fill.xinrongji { background: linear-gradient(90deg, #f59e0b, #fbbf24); color: #1a1a1a; }
+
+  /* Comparison Table */
+  .comp-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .comp-table th {
+    background: rgba(255,255,255,0.03);
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .comp-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    border-top: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .comp-table tr:first-child td { border-top: none; }
+  .tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 2px 4px;
+  }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+  .tag-yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .tag-red { background: var(--red-bg); color: var(--red); }
+  .tag-blue { background: var(--blue-bg); color: var(--blue); }
+
+  /* Timeline */
+  .timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 24px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .timeline-step {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .timeline-step .node {
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 90px;
+    transition: border-color 0.2s;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .timeline-step .node.lj { border-color: #3b82f6; }
+  .timeline-step .node.xrj { border-color: #f59e0b; }
+  .timeline-step .arrow {
+    color: var(--text-muted);
+    font-size: 20px;
+    padding: 0 8px;
+    font-weight: 300;
+  }
+
+  /* Recommendation Card */
+  .rec-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .rec-card .rec-num {
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .rec-card h4 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .rec-card p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* Highlight */
+  .highlight { color: var(--accent); font-weight: 600; }
+  .highlight-red { color: var(--red); font-weight: 600; }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* Flow Diagram */
+  .flow-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .flow-row:last-child { margin-bottom: 0; }
+  .flow-box {
+    background: rgba(99,91,255,0.1);
+    border: 1px solid rgba(99,91,255,0.25);
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    color: var(--text-muted);
+    font-size: 18px;
+  }
+
+  .note {
+    background: rgba(99,91,255,0.06);
+    border: 1px solid rgba(99,91,255,0.15);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 20px;
+  }
+  .note strong { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="header">
+  <div class="badge">智数分析 · AI排菜系统</div>
+  <h1>隆聚 vs 新荣记</h1>
+  <p class="subtitle">AI排菜系统菜品标签体系 & 排菜逻辑对比分析</p>
+  <p class="subtitle" style="font-size:13px;margin-top:4px;color:var(--text-muted);">基于菜品数据，结合AI排菜系统逻辑图进行深度对比</p>
+</div>
+
+<!-- ============ SECTION 0: NOTE ============ -->
+<div class="note" style="margin-bottom:40px;">
+  <strong>⚠️ 说明：</strong>由于当前模型不支持图片读取，本次分析基于两个集团菜品 Excel 数据中的标签体系结构，结合你提供的 AI 排菜系统逻辑图进行推断对比。如需基于图片内容做更精确分析，请切换到支持多模态的模型后重试。
+</div>
+
+<!-- ============ SECTION 1: 数据总览 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">📊</span> 数据总览</div>
+  <div class="grid-3">
+    <div class="stat-card">
+      <div class="label">隆聚集团 · 门店菜品</div>
+      <div class="value" style="color:#3b82f6;">116</div>
+      <div class="detail">道菜品 · 8类菜品类型</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">新荣记集团 · 门店菜品</div>
+      <div class="value" style="color:#f59e0b;">119</div>
+      <div class="detail">道菜品 · 8级结构维度</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">标签体系差距</div>
+      <div class="value">2.5×</div>
+      <div class="detail">新荣记标签维度是隆聚的 2.5 倍</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SECTION 2: 标签体系对比 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">🏷️</span> 标签体系维度对比</div>
+  <p style="color:var(--text-secondary);margin-bottom:24px;font-size:14px;">
+    标签体系是 AI 排菜系统的核心基础设施。维度越多，排菜逻辑可考虑的约束条件就越丰富。
+  </p>
+  
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th style="width:18%">维度</th>
+        <th style="width:34%">🏪 隆聚集团</th>
+        <th style="width:34%">🏠 新荣记集团</th>
+        <th style="width:14%">评判</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>🔢 菜品结构</strong><br><span style="font-size:12px;color:var(--text-muted)">上菜顺序 / 菜品位置</span></td>
+        <td>
+          特色(30.2%) · 小菜(19.8%) · 主菜(18.1%)<br>
+          前菜(12.9%) · 时令(8.6%) · 点心(5.2%)<br>
+          招牌(3.4%) · 汤羹(1.7%)<br>
+          <span style="color:var(--yellow);font-size:12px;">⚠️ 混用"菜品等级"和"上菜位置"</span>
+        </td>
+        <td>
+          主菜(45.4%) · 高档品(20.2%) · 前菜(16.8%)<br>
+          甜品(14.3%) · 汤羹(7.6%) · 主食(6.7%)<br>
+          烧卤(5.9%) · 头盘(2.5%)<br>
+          <span style="color:var(--green);font-size:12px;">✅ 严格按上菜顺序分级</span>
+        </td>
+        <td><span class="tag tag-yellow">隆聚需改进</span></td>
+      </tr>
+      <tr>
+        <td><strong>👅 味型</strong></td>
+        <td>
+          咸 89 · 鲜 68 · 香 29 · 甜 18<br>
+          浓郁 13 · 酸 12 · 辣 6 · 椒麻 5 · 清爽 3<br>
+          <span style="color:var(--text-muted);font-size:12px;">覆盖 9 种味型</span>
+        </td>
+        <td>
+          咸 75 · 鲜 65 · 香 41 · 浓郁 26 · 甜 24<br>
+          辣 12 · 酸 6 · 清爽 3<br>
+          <span style="color:var(--text-muted);font-size:12px;">覆盖 8 种味型</span>
+        </td>
+        <td><span class="tag tag-green">旗鼓相当</span></td>
+      </tr>
+      <tr>
+        <td><strong>🌿 食材</strong></td>
+        <td>
+          海鲜 25 · 鱼 14 · 江河鲜 11 · 蟹 9<br>
+          牛肉 8 · 龙虾 8 · 虾 7 · 猪肉 6<br>
+          <span style="color:var(--text-muted);font-size:12px;">粒度过粗，大量归类到"海鲜"</span>
+        </td>
+        <td>
+          海鲜 43 · 鱼 29 · 蟹 16 · 猪肉 12<br>
+          蛋类 12 · 虾 9 · 乳制品 8 · 蔬菜 6<br>
+          <span style="color:var(--text-muted);font-size:12px;">细分度高，"蛋类""乳制品""菌菇"单列</span>
+        </td>
+        <td><span class="tag tag-yellow">新荣记更细</span></td>
+      </tr>
+      <tr>
+        <td><strong>🔥 烹饪方式</strong></td>
+        <td>
+          烧 32 · 炒 17 · 蒸 14 · 煨 14<br>
+          堂灼 7 · 炸 5 · 凉拌 5 · 刺身 5<br>
+          <span style="color:var(--text-muted);font-size:12px;">覆盖 13 种</span>
+        </td>
+        <td>
+          烧 36 · 蒸 11 · 凉拌 9 · 焖 8 · 炖 8 · 炒 8<br>
+          炸 7 · 煨 6 · 堂灼 5 · 醉 4 · 烤 4 · 焗 2<br>
+          <span style="color:var(--text-muted);font-size:12px;">覆盖 14 种</span>
+        </td>
+        <td><span class="tag tag-green">相当</span></td>
+      </tr>
+      <tr>
+        <td><strong>🏠 用餐场景</strong></td>
+        <td>
+          商务宴请 109 · 家庭聚餐 96 · 朋友聚会 20<br>
+          <span style="color:var(--red);font-size:12px;">❌ 无"外宾""素食"等细分场景</span>
+        </td>
+        <td>
+          家庭聚餐 118 · 朋友聚会 118 · 商务宴请 117<br>
+          外宾 65 · 素食 4<br>
+          <span style="color:var(--green);font-size:12px;">✅ 覆盖外宾、素食等特殊场景</span>
+        </td>
+        <td><span class="tag tag-red">隆聚缺失</span></td>
+      </tr>
+      <tr>
+        <td><strong>📅 时令维度</strong></td>
+        <td>
+          <span style="color:var(--red);">❌ 无月份维度</span><br>
+          <span style="color:var(--text-muted);font-size:12px;">仅有"时令"类型标签（10道）</span>
+        </td>
+        <td>
+          1-12月全覆盖<br>
+          <span style="color:var(--green);font-size:12px;">✅ 每道菜标注最佳时令月份</span>
+        </td>
+        <td><span class="tag tag-red">隆聚缺失</span></td>
+      </tr>
+      <tr>
+        <td><strong>👥 人数维度</strong></td>
+        <td>
+          <span style="color:var(--red);">❌ 无人数维度</span>
+        </td>
+        <td>
+          1人以上至 N 人<br>
+          <span style="color:var(--green);font-size:12px;">✅ 每道菜标注适用人数</span>
+        </td>
+        <td><span class="tag tag-red">隆聚缺失</span></td>
+      </tr>
+      <tr>
+        <td><strong>💰 毛利维度</strong></td>
+        <td>
+          <span style="color:var(--red);">❌ 无毛利标签</span>
+        </td>
+        <td>
+          <span style="color:var(--green);font-size:12px;">✅ 高毛利/低毛利菜品分类</span>
+        </td>
+        <td><span class="tag tag-red">隆聚缺失</span></td>
+      </tr>
+      <tr>
+        <td><strong>🎯 属性维度</strong></td>
+        <td>
+          仅靠"菜品类型"区分<br>
+          <span style="color:var(--text-muted);font-size:12px;">招牌·特色·主菜·小菜·时令·点心·前菜·汤羹</span>
+        </td>
+        <td>
+          招牌 · 经典 · 时令菜 · 特色菜 · 本地菜<br>
+          一店一味 · 高/低毛利 · 仪式感(堂作)
+        </td>
+        <td><span class="tag tag-yellow">新荣记更丰富</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="divider">
+
+<!-- ============ SECTION 3: AI排菜逻辑对比 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">🧠</span> AI排菜逻辑对比</div>
+  
+  <div class="grid-2">
+    <!-- 隆聚 -->
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#3b82f6;"></span> 隆聚 AI 排菜推测逻辑</h3>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+        基于现有标签结构，推测排菜逻辑如下：
+      </div>
+      <div class="flow-container" style="border-color:rgba(59,130,246,0.2);background:rgba(59,130,246,0.04);">
+        <div class="flow-row">
+          <div class="flow-box" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);">用餐场景<br><small>商务/家庭/朋友</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);">菜品类型筛选<br><small>招牌+主菜+特色+小菜</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);">味型平衡<br><small>咸鲜为主，避免重复</small></div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-box" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);">烹饪方式多样<br><small>烧/炒/蒸/煨搭配</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.3);">食材去重<br><small>避免同主食材重复</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3);">❌ 无上菜顺序约束</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <span class="tag tag-red">⚠️ 缺乏结构维度</span>
+        <span class="tag tag-red">⚠️ 无人数适配</span>
+        <span class="tag tag-red">⚠️ 无时令优化</span>
+        <span class="tag tag-red">⚠️ 无毛利考量</span>
+      </div>
+    </div>
+
+    <!-- 新荣记 -->
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#f59e0b;"></span> 新荣记 AI 排菜推测逻辑</h3>
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">
+        基于丰富标签体系，推测排菜逻辑更加精细：
+      </div>
+      <div class="flow-container" style="border-color:rgba(245,158,11,0.2);background:rgba(245,158,11,0.04);">
+        <div class="flow-row">
+          <div class="flow-box" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);">用餐场景<br><small>含外宾/素食</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);">人数适配<br><small>1人/多人分餐</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);">时令过滤<br><small>当前月份最优食材</small></div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-box" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);">结构编排<br><small>头盘→汤羹→主菜→主食→甜品</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);">味型节奏<br><small>清淡→浓郁→清爽收尾</small></div>
+          <span class="flow-arrow">→</span>
+          <div class="flow-box" style="background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.3);">毛利优化<br><small>高毛利+低毛利搭配</small></div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <span class="tag tag-green">✅ 结构驱动排菜</span>
+        <span class="tag tag-green">✅ 时令智能匹配</span>
+        <span class="tag tag-green">✅ 人数精细适配</span>
+        <span class="tag tag-green">✅ 毛利经济优化</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ============ SECTION 4: 核心差异点 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">⚡</span> 核心差异点总结</div>
+  
+  <div class="grid-2">
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#ef4444;"></span> 隆聚的短板</h3>
+      <table style="width:100%;font-size:14px;">
+        <tr>
+          <td style="padding:8px 0;color:var(--red);">❌</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>菜品类型混用</strong>："特色""招牌""主菜"等是等级概念，"前菜""汤羹""点心"是位置概念，无法形成统一的上菜顺序约束</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--red);">❌</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>无上菜节奏</strong>：AI 排菜无法判断一道菜应该第几个上，只能靠"菜品类型"意会</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--red);">❌</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>无时令约束</strong>：10 道时令菜，但没有标注具体月份，AI 无法做季节性推荐</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--red);">❌</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>无人数适配</strong>：无法区分 1 人餐和 10 人宴的排菜差异</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--red);">❌</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>无毛利考量</strong>：AI 无法在满足口味的同时优化整桌菜的经济性</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--red);">❌</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>场景覆盖窄</strong>：仅 3 种场景，无外宾、素食、宴会等特殊需求</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#22c55e;"></span> 新荣记的优势</h3>
+      <table style="width:100%;font-size:14px;">
+        <tr>
+          <td style="padding:8px 0;color:var(--green);">✅</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>结构驱动排菜</strong>：头盘→烧卤→汤羹→主菜→主食→甜品，AI 可严格按上菜顺序编排</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--green);">✅</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>时令智能匹配</strong>：1-12月精确标注，AI 自动推荐当月最佳菜品</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--green);">✅</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>人数精细适配</strong>：1人及以上精确标注，适配分餐/合餐场景</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--green);">✅</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>经济性优化</strong>：高/低毛利标签让 AI 可在满足口味的同时平衡毛利</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--green);">✅</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>场景全覆盖</strong>：外宾、素食等特殊需求有专门标签</td>
+        </tr>
+        <tr>
+          <td style="padding:8px 0;color:var(--green);">✅</td>
+          <td style="padding:8px 0;color:var(--text-secondary);"><strong>属性分层</strong>：招牌→经典→特色→时令→本地→一店一味，层级分明</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ============ SECTION 5: 优劣势总结 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">📋</span> 优劣势综合分析</div>
+  
+  <div class="grid-2">
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#3b82f6;"></span> 隆聚 · 优势</h3>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:2;">
+        ✅ <strong>菜品数量相当</strong>：116道 vs 119道，基础菜品池充足<br>
+        ✅ <strong>味型覆盖丰富</strong>：9种味型，椒麻、鲜 等地方特色突出<br>
+        ✅ <strong>烹饪方式多样</strong>：13种烹饪方式，堂灼、煨、刺身等差异化明显<br>
+        ✅ <strong>标签简洁</strong>：59个不同标签，维护成本低，操作门槛低
+      </div>
+    </div>
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#ef4444;"></span> 隆聚 · 劣势</h3>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:2;">
+        ❌ <strong>缺乏上菜结构维度</strong>：AI无法感知菜品在宴席流程中的位置<br>
+        ❌ <strong>无时令约束</strong>：无法根据季节智能推荐<br>
+        ❌ <strong>无人数适配</strong>：无法差异化排菜<br>
+        ❌ <strong>无经济性维度</strong>：无法做毛利优化<br>
+        ❌ <strong>场景覆盖不足</strong>：缺少外宾、素食等标签<br>
+        ❌ <strong>食材粒度粗</strong>："海鲜"标签过多(25次)，难以精确去重
+      </div>
+    </div>
+    <div class="dim-card">
+      <h3><span class="dot" style="background:#f59e0b;"></span> 新荣记 · 优势</h3>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:2;">
+        ✅ <strong>结构维度完整</strong>：8级上菜顺序清晰，AI可编排完整宴席流程<br>
+        ✅ <strong>时令精细化管理</strong>：月份级标注，配合食材季节性做最优推荐<br>
+        ✅ <strong>人数适配精确</strong>：从1人到10人+，适配各种用餐规模<br>
+        ✅ <strong>经济性可量化</strong>：毛利标签让AI兼顾口味与效益<br>
+        ✅ <strong>场景全覆盖</strong>：外宾、素食等特殊需求纳入标签体系<br>
+        ✅ <strong>属性分层清晰</strong>：从招牌到本地再到一店一味，决策层级分明
+      </div>
+    </div>
+    <div class="dim-card">
+      <h3><span class="dot" style="background:rgba(245,158,11,0.5);"></span> 新荣记 · 潜在不足</h3>
+      <div style="font-size:14px;color:var(--text-secondary);line-height:2;">
+        ⚠️ <strong>标签维护成本高</strong>：维度多意味着每道菜的标签工作量大<br>
+        ⚠️ <strong>2月数据异常</strong>：数据显示"2月"标签覆盖了117道菜（几乎所有），可能是 "12月" 被误匹配到 "2月" 的文本匹配问题<br>
+        ⚠️ <strong>人数粒度可优化</strong>：117道标注"1人及以上"，仅1道标注"5人以上"，区分度有限<br>
+        ⚠️ <strong>缺乏规格信息</strong>：虽有规格列但大量为空，实际排菜时需要考虑份量
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ============ SECTION 6: 隆聚改进方案 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">🚀</span> 隆聚 AI 排菜系统改进方案</div>
+  <p style="color:var(--text-secondary);margin-bottom:28px;font-size:14px;">
+    以下方案按优先级排序，建议分阶段实施。每个改进点都直接对应排菜结果质量的提升。
+  </p>
+
+  <!-- P0 -->
+  <div style="margin-bottom:28px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--red);">🔴 P0 — 立即改造（核心架构问题）</h3>
+    
+    <div class="rec-card" style="border-left-color:#ef4444;">
+      <div class="rec-num">P0-1</div>
+      <h4>引入「上菜结构」维度，替代混用的「菜品类型」</h4>
+      <p>
+        当前"菜品类型"混用了等级和位置概念。建议拆分为两个独立维度：<br><br>
+        <strong>① 结构维度（上菜位置）：</strong>头盘 → 冷菜/烧卤 → 汤羹 → 主菜（热菜）→ 主食 → 甜品 → 果盘<br>
+        <strong>② 属性维度（菜品等级）：</strong>招牌 · 特色 · 经典 · 时令 · 本地 · 一店一味<br><br>
+        这样 AI 排菜时可以严格按照"上菜节奏"进行编排——先冷后热、先淡后浓、荤素交替、汤在中段。
+      </p>
+    </div>
+  </div>
+
+  <!-- P1 -->
+  <div style="margin-bottom:28px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--yellow);">🟡 P1 — 本季度完成（排菜质量提升）</h3>
+
+    <div class="rec-card" style="border-left-color:#f59e0b;">
+      <div class="rec-num">P1-1</div>
+      <h4>增加「时令月份」维度</h4>
+      <p>
+        为每道菜标注最佳食用月份（可多选），让 AI 根据当前日期自动过滤。例如大闸蟹标注 9-11月，春笋标注 3-4月。<br>
+        这不仅提升排菜质量，还能驱动采购端的季节性备货。
+      </p>
+    </div>
+
+    <div class="rec-card" style="border-left-color:#f59e0b;">
+      <div class="rec-num">P1-2</div>
+      <h4>增加「用餐人数」维度</h4>
+      <p>
+        标注每道菜适用的最低人数，例如：堂灼类标注"2人起"，刺身拼盘标注"4人起"，小份点心标注"1人起"。<br>
+        AI 排菜时可自动根据用餐人数过滤菜品池，避免 2 人桌推荐了 8 人份的大菜。
+      </p>
+    </div>
+
+    <div class="rec-card" style="border-left-color:#f59e0b;">
+      <div class="rec-num">P1-3</div>
+      <h4>细化食材标签粒度</h4>
+      <p>
+        当前"海鲜"标签过于宽泛（25次），建议细化到具体品类：<br>
+        <strong>细分建议：</strong>深海鱼 / 近海鱼 / 甲壳类(虾蟹) / 贝类 / 软体类(鱿鱼章鱼) / 海藻类<br>
+        这样 AI 在做食材去重时，不会把"虾"和"鱼"当成同一类食材跳过。
+      </p>
+    </div>
+  </div>
+
+  <!-- P2 -->
+  <div style="margin-bottom:28px;">
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--blue);">🔵 P2 — 后续迭代（精细化运营）</h3>
+
+    <div class="rec-card" style="border-left-color:#3b82f6;">
+      <div class="rec-num">P2-1</div>
+      <h4>增加「毛利率」维度</h4>
+      <p>
+        标注高毛利/中毛利/低毛利，让 AI 排菜在满足口味约束的前提下，能优化整桌菜的经济结构。<br>
+        例如：一桌 10 人宴席，3道高毛利镇桌 + 4道中毛利主力 + 3道引流款低毛利。
+      </p>
+    </div>
+
+    <div class="rec-card" style="border-left-color:#3b82f6;">
+      <div class="rec-num">P2-2</div>
+      <h4>增加场景细分标签</h4>
+      <p>
+        <strong>必加：</strong>外宾（清真/无猪肉）、素食（全素/蛋奶素）、宴会（婚宴/寿宴/商务宴）<br>
+        <strong>建议加：</strong>老人/儿童友好（软烂/无刺/不辣）、仪式感（堂作/火焰/干冰）
+      </p>
+    </div>
+
+    <div class="rec-card" style="border-left-color:#3b82f6;">
+      <div class="rec-num">P2-3</div>
+      <h4>增加「规格/份量」信息</h4>
+      <p>
+        当前隆聚完全没有规格信息。建议增加：例份 / 小份 / 位上的标注，让 AI 能根据人数自动调整推荐份量。<br>
+        例如：4人桌推荐 1例份鱼 + 2小份前菜 + 4位汤，而不是盲目堆菜品数量。
+      </p>
+    </div>
+  </div>
+
+  <!-- P3 -->
+  <div>
+    <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;color:var(--text-muted);">⚪ P3 — 长期优化（智能化升级）</h3>
+
+    <div class="rec-card" style="border-left-color:rgba(255,255,255,0.15);">
+      <div class="rec-num">P3-1</div>
+      <h4>引入菜品间搭配规则</h4>
+      <p>
+        定义菜品间的搭配关系：绝配（如烤鸭+甜面酱饼）、冲突（如两道都是红烧重口味）、互补（一蒸一炸）。<br>
+        让 AI 不只是去重，而是能主动创造"黄金搭配"。
+      </p>
+    </div>
+
+    <div class="rec-card" style="border-left-color:rgba(255,255,255,0.15);">
+      <div class="rec-num">P3-2</div>
+      <h4>基于历史订单的个性化推荐</h4>
+      <p>
+        结合门店历史点单数据，学习不同门店/不同客群的菜品偏好，在排菜时融入"数据驱动"的推荐权重。<br>
+        例如某门店海鲜点单率 3 倍于其他门店，AI 自动加大海鲜权重。
+      </p>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- ============ SECTION 7: 标签体系对比一览 ============ -->
+<div class="section">
+  <div class="section-title"><span class="icon">📐</span> 推荐标签体系（隆聚改造后 vs 新荣记）</div>
+  
+  <table class="comp-table">
+    <thead>
+      <tr>
+        <th>维度</th>
+        <th>🏪 隆聚（当前）</th>
+        <th>🏪 隆聚（改造后）</th>
+        <th>🏠 新荣记（参考）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>菜品结构</td>
+        <td>⚠️ 混用（特色/招牌/主菜/小菜）</td>
+        <td><span class="tag tag-green">头盘→冷菜→汤羹→热菜→主食→甜品</span></td>
+        <td>前菜→烧卤→头盘→汤羹→主菜→主食→甜品</td>
+      </tr>
+      <tr>
+        <td>菜品属性</td>
+        <td>⚠️ 与结构混用</td>
+        <td><span class="tag tag-green">招牌·经典·特色·时令·本地·一店一味</span></td>
+        <td>招牌·经典·特色·时令·本地·一店一味</td>
+      </tr>
+      <tr>
+        <td>食材</td>
+        <td>9大类（海鲜占比过高）</td>
+        <td><span class="tag tag-green">15+ 细分品类</span></td>
+        <td>20类精细食材</td>
+      </tr>
+      <tr>
+        <td>味型</td>
+        <td>✅ 9种</td>
+        <td>✅ 保持 + 新增"鲜甜""麻辣"</td>
+        <td>8种</td>
+      </tr>
+      <tr>
+        <td>烹饪方式</td>
+        <td>✅ 13种</td>
+        <td>✅ 保持</td>
+        <td>14种</td>
+      </tr>
+      <tr>
+        <td>时令月份</td>
+        <td><span class="tag tag-red">❌ 无</span></td>
+        <td><span class="tag tag-green">✅ 1-12月精确标注</span></td>
+        <td>✅ 月份标注</td>
+      </tr>
+      <tr>
+        <td>用餐人数</td>
+        <td><span class="tag tag-red">❌ 无</span></td>
+        <td><span class="tag tag-green">✅ 1-10人+ 分级标注</span></td>
+        <td>✅ 人数标注</td>
+      </tr>
+      <tr>
+        <td>经营属性</td>
+        <td><span class="tag tag-red">❌ 无</span></td>
+        <td><span class="tag tag-green">✅ 高/中/低毛利</span></td>
+        <td>✅ 高/低毛利</td>
+      </tr>
+      <tr>
+        <td>特殊场景</td>
+        <td>仅3种场景</td>
+        <td><span class="tag tag-green">新增外宾/素食/宴会/老人儿童</span></td>
+        <td>外宾·素食</td>
+      </tr>
+      <tr>
+        <td>规格份量</td>
+        <td><span class="tag tag-red">❌ 无</span></td>
+        <td><span class="tag tag-green">例份/小份/位上</span></td>
+        <td>部分有</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<hr class="divider">
+
+<!-- ============ SECTION 8: Footer ============ -->
+<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:20px 0;">
+  <p>智数分析专家团 · 主理人 Nova · 2026年5月</p>
+  <p style="margin-top:4px;">基于隆聚集团 & 新荣记集团菜品 Excel 数据 + AI排菜系统逻辑图分析</p>
+</div>
+
+</div>
+</body>
+</html>
